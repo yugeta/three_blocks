@@ -1,0 +1,37 @@
+@import 'css/block.css';
+@import 'css/table.css';
+@import 'css/button.css';
+@import 'css/question.css';
+
+.three-blocks,
+.three-blocks *,
+.three-blocks *:before,
+.three-blocks *:after {
+  -webkit-box-sizing : border-box;
+     -moz-box-sizing : border-box;
+       -o-box-sizing : border-box;
+      -ms-box-sizing : border-box;
+          box-sizing : border-box;
+}
+
+.three-blocks{
+  --size-area : 300px;
+  --size-line : 1px;
+  --size-button: 50px;
+  --count-lattice : 5;
+  --size-lattice:calc(var(--size-area) / var(--count-lattice));
+  --color-line : black;
+  --color-block : #888a;
+  --color-block-hover  : #f88a;
+  --color-block-active : #88fa;
+
+  width        : var(--size-area);
+  height       : var(--size-area);
+  border-color : var(--color-line);
+  border-style : solid;
+  border-width : 0;
+  position:relative;
+  /* margin-top:calc(var(--size-area) / 2 + 10px); */
+}
+
+

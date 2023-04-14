@@ -1,0 +1,12 @@
+.three-blocks > table{
+  width:var(--size-area);
+  height:var(--size-area);
+  border-collapse:collapse;
+}
+.three-blocks > table td{
+  border:1px solid black;
+  background-color:white;
+}
+.three-blocks > table td[data-status='active']{
+  background-color:black;
+}

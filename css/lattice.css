@@ -1,0 +1,39 @@
+.lattice{
+  background-image:
+  repeating-linear-gradient(
+    90deg,
+    #000 ,
+    #000 1px,
+    transparent 1px,
+    transparent var(--size-lattice)
+  ),
+  repeating-linear-gradient(
+    0deg,
+    #000 ,
+    #000 1px,
+    #fff 1px,
+    #fff var(--size-lattice)
+  );
+}
+
+.lattice-vertical{
+  background-image:
+  repeating-linear-gradient(
+    90deg,
+    #000 ,
+    #000 1px,
+    #fff 1px,
+    #fff var(--size-lattice)
+  );
+}
+
+.lattice-holizontal{
+  background-image:
+  repeating-linear-gradient(
+    0deg,
+    #000 ,
+    #000 1px,
+    #fff 1px,
+    #fff var(--size-lattice)
+  );
+}

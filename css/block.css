@@ -1,0 +1,69 @@
+.three-blocks .block,
+.three-blocks .block *{
+  font-size:0;
+  padding:0;
+  margin:0;
+  outline:0;
+  border:0;
+}
+.three-blocks .block{
+  display:block;
+  position:absolute;
+  width:0;
+  height:0;
+  z-index:1;
+  transition-property:left , top;
+  transition-duration:0.3s;
+}
+
+.three-blocks:not([data-status='active']) .block:has(.piece[data-bit='1']:hover) .piece[data-bit='1']{
+  background-color:var(--color-block-hover);
+}
+.three-blocks .block[data-status='active']{
+  filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
+  z-index:10;
+  transition-property:none;
+}
+.three-blocks .block[data-status='active'] .piece[data-bit='1']{
+  background-color:var(--color-block-active)!important;
+}
+
+.three-blocks .block .step{
+  position:absolute;
+  top:0;
+  left:0;
+  width:0;
+  height:0;
+}
+.three-blocks .block .step:nth-of-type(2){
+  top:calc(var(--size-lattice) * 1);
+}
+.three-blocks .block .step:nth-of-type(3){
+  top:calc(var(--size-lattice) * 2);
+}
+
+.three-blocks .block .step .piece{
+  position:absolute;
+  top:0;
+  left:0;
+  width : calc(var(--size-lattice));
+  height: calc(var(--size-lattice));
+  background-color: var(--color-block);
+}
+.three-blocks .block .step .piece[data-bit='1']{
+  background-color: var(--color-block);
+  cursor:pointer;
+}
+.three-blocks .block .step .piece[data-bit='0']{
+  background-color: transparent;
+  pointer-events:none;
+}
+.three-blocks .block .step .piece:nth-of-type(2){
+  left:calc(var(--size-lattice) * 1);
+}
+.three-blocks .block .step .piece:nth-of-type(3){
+  left:calc(var(--size-lattice) * 2);
+}
+
+
+
