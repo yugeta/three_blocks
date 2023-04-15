@@ -28,6 +28,7 @@ const Options = {
   // イベント発動で発火するメソッド
   resize_callback     : function(cursor , e){},
   click_callback      : function(cursor , e){},
+  dblclick_callback   : function(cursor , e){},
 
   cursordown_callback : function(cursor , e){},
   cursorup_callback   : function(cursor , e){},
@@ -59,8 +60,9 @@ export class Control{
   }
 
   setEvent(){
-    window.addEventListener("resize" , this.resize.bind(this))
-    window.addEventListener("click"  , this.click.bind(this))
+    window.addEventListener("resize"    , this.resize.bind(this))
+    window.addEventListener("click"     , this.click.bind(this))
+    window.addEventListener("dblclick"  , this.dblclick.bind(this))
 
     if(this.options.keyboard){
       window.addEventListener("keydown" , this.keydown.bind(this))
@@ -80,10 +82,16 @@ export class Control{
 
   // default
   resize(e){
+    if(!this.options.resize_callback){return}
     this.options.resize_callback(e)
   }
   click(e){
+    if(!this.options.click_callback){return}
     this.options.click_callback(e)
+  }
+  dblclick(e){
+    if(!this.options.dblclick_callback){return}
+    this.options.dblclick_callback(e)
   }
 
   // Keyboard ----------
@@ -177,14 +185,17 @@ export class Control{
   // Mouse ----------
   mousedown(e){
     this.mouseDownFlag = true
+    if(!this.options.mousedown_callback){return}
     this.options.mousedown_callback(e)
   }
   mousemove(e){
     if(!this.mouseDownFlag){return}
+    if(!this.options.mousemove_callback){return}
     this.options.mousemove_callback(e)
   }
   mouseup(e){
     this.mouseDownFlag = false
+    if(!this.options.mouseup_callback){return}
     this.options.mouseup_callback(e)
   }
 
@@ -204,6 +215,7 @@ export class Control{
         y : e.touches[0].pageY
       }
     }
+    if(!this.options.touchstart_callback){return}
     this.options.touchstart_callback(e)
   }
   touchmove(e){
@@ -218,12 +230,14 @@ export class Control{
         this.options.slanting
       );
     }
+    if(!this.options.touchmove_callback){return}
     this.options.touchmove_callback(this.touchSwipeDirection , e)
     if(this.options.touchPreventDefault){
       e.preventDefault()
     }
   }
   touchend(e){
+    if(!this.options.touchend_callback){return}
     this.options.touchend_callback(this.touchSwipeDirection , this.touchTapCount || 1 , e)
     this.touchSwipeDirection = null
   }

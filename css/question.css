@@ -25,8 +25,8 @@
   min-height:100px;
   background-color:black;
   color:white;
-  position:absolute;
-  top:calc(var(--size-area) + var(--size-button));
+  /* position:absolute; */
+  /* top:calc(var(--size-area) + var(--size-button)); */
 } 
 
 .three-blocks > .question .block{

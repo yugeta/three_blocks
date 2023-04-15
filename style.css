@@ -2,6 +2,7 @@
 @import 'css/table.css';
 @import 'css/button.css';
 @import 'css/question.css';
+@import 'css/links.css';
 
 .three-blocks,
 .three-blocks *,
@@ -26,7 +27,7 @@
   --color-block-active : #88fa;
 
   width        : var(--size-area);
-  height       : var(--size-area);
+  /* height       : var(--size-area); */
   border-color : var(--color-line);
   border-style : solid;
   border-width : 0;

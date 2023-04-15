@@ -1,0 +1,42 @@
+.three-blocks .links{
+  width:100%;
+  min-height:100px;
+  border:1px solid black;
+  padding:5px 10px;
+}
+.three-blocks .links::before{
+  content:'[Clears]';
+  display:block;
+  font-size:0.8rem;
+  color:#aaa;
+}
+.three-blocks .links ol{
+  padding:0;
+  display:block;
+}
+.three-blocks .links ol li{
+  cursor:pointer;
+  list-style:none;
+  display:inline-block;
+  min-width:30px;
+  height:30px;
+  border:1px solid #aaa;
+  border-radius:2px;
+  background-color:white;
+  text-align:center;
+  line-height:30px;
+  margin:4px;
+}
+.three-blocks .links ol li:hover{
+  background-color:#FEE;
+}
+.three-blocks .links ol li{
+  color:blue;
+}
+.three-blocks .links ol li[data-status='active']{
+  color:red;
+}
+.three-blocks .links ol li[data-clear='1']{
+  color:#aaa;
+}
+
