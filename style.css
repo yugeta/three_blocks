@@ -35,4 +35,9 @@
   /* margin-top:calc(var(--size-area) / 2 + 10px); */
 }
 
+@media (max-width:600px){
+  .three-blocks{
+    --size-area : 200px;
+  }
+}
 

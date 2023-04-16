@@ -1,4 +1,4 @@
-import { Control } from './control.js'
+// import { Control } from './control.js'
 import { Css }     from './css.js'
 import { Ajax }    from './ajax.js'
 
@@ -60,7 +60,6 @@ export class ThreeBlocks{
   }
 
   init(){
-    
     this.add_table()
     this.add_submit()
     this.add_question()
@@ -133,12 +132,12 @@ export class ThreeBlocks{
   reset_answer_blocks(){
     const blocks = this.target.querySelectorAll(`:scope > .block`)
     for(let i=0; i<blocks.length; i++){
-      const x = this.target.offsetWidth + this.size_piece
+      const x = this.target.offsetWidth + 10
       const y = i * (this.size_piece * 3)
       blocks[i].style.setProperty('left' , `${x}px`,'')
       blocks[i].style.setProperty('top'  , `${y}px`,'')
       blocks[i].setAttribute('data-rotate' , 0)
-      // this.del_block_piece(blocks[i])
+      blocks[i].setAttribute('data-flip'   , 0)
       this.set_block_piece(blocks[i])
     }
   }
@@ -149,9 +148,10 @@ export class ThreeBlocks{
     block.classList.add('block')
     block.setAttribute('data-block-num' , num)
     block.setAttribute('data-rotate' , 0)
+    block.setAttribute('data-flip'   , 0)
     this.target.appendChild(block)
     this.set_block_piece(block)
-    const x = this.target.offsetWidth + this.size_piece
+    const x = this.target.offsetWidth + 10
     const y = num * (this.size_piece * 3)
     block.style.setProperty('left' , `${x}px`,'')
     block.style.setProperty('top'  , `${y}px`,'')
@@ -256,62 +256,83 @@ export class ThreeBlocks{
   }
 
   set_control(){
-    new Control({
-      slanting : false, // 斜め入力なし
-      resize_callback     : this.resize.bind(this),
-      click_callback      : this.click.bind(this),
-      cursordown_callback : this.cursordown.bind(this),
-      cursorup_callback   : this.cursorup.bind(this),
-      keydown_callback    : this.keydown.bind(this),
-      keyup_callback      : this.keyup.bind(this),
-      mousedown_callback  : this.mousedown.bind(this),
-      mousemove_callback  : this.mousemove.bind(this),
-      mouseup_callback    : this.mouseup.bind(this),
-      touchstart_callback : this.touchstart.bind(this),
-      touchmove_callback  : this.touchmove.bind(this),
-      touchend_callback   : this.touchend.bind(this),
-    })
+    window.addEventListener('mousedown'  , this.mousedown.bind(this))
+    window.addEventListener('mousemove'  , this.mousemove.bind(this))
+    window.addEventListener('mouseup'    , this.mouseup.bind(this))
+    window.addEventListener('touchstart' , this.touchstart.bind(this))
+    window.addEventListener('touchmove'  , this.touchmove.bind(this), {passive : false})
+    window.addEventListener('touchend'   , this.touchend.bind(this))
   }
-  resize(e){}
-  click(e){}
-  cursordown(e){}
-  cursorup(e){}
-  keydown(e){}
-  keyup(e){}
 
   /* PC-mouse */
   mousedown(e){
-    const target = e.target.closest('.block[data-block-num]')
-    if(!target){return}
-    const current_pos = {
-      x  : target.offsetLeft,
-      y  : target.offsetTop,
-    }
-    const map = this.get_near_map(current_pos)
+    this.event_start({
+      target : e.target.closest('.block[data-block-num]'),
+      x      : e.pageX,
+      y      : e.pageY,
+    })
+  }
+  mousemove(e){
+    this.event_move({
+      x : e.pageX,
+      y : e.pageY,
+    })
+  }
+  mouseup(e){
+    this.event_end()
+  }
+
+  /* Smartphone-touch */
+  touchstart(e){
+    this.event_start({
+      target : e.target.closest('.block[data-block-num]'),
+      x      : e.touches[0].pageX,
+      y      : e.touches[0].pageY,
+    })
+  }
+  touchmove(e){
+    this.event_move({
+      x : e.touches[0].pageX,
+      y : e.touches[0].pageY,
+    })
+    e.preventDefault()
+  }
+  touchend(e){
+    this.event_end()
+  }
+
+  event_start(options){
+    if(!options || !options.target){return}
+    options.left = options.target.offsetLeft
+    options.top  = options.target.offsetTop
+    const map = this.get_near_map({
+      x : options.left,
+      y : options.top,
+    })
     this.block_data = {
-      target : target,
-      x   : current_pos.x,
-      y   : current_pos.y,
-      w   : target.scrollWidth,
-      h   : target.scrollHeight,
-      mx  : e.pageX,
-      my  : e.pageY,
-      mx2 : e.pageX,
-      my2 : e.pageY,
-      move_map    : map,
+      target   : options.target,
+      x        : options.left,
+      y        : options.top,
+      w        : options.target.scrollWidth,
+      h        : options.target.scrollHeight,
+      mx       : options.x,
+      my       : options.y,
+      mx2      : options.x,
+      my2      : options.y,
+      move_map : map,
       time : (+new Date()),
     }
-    target.setAttribute('data-status','active')
+    options.target.setAttribute('data-status','active')
     this.options.target.setAttribute('data-status' , 'active')
     setTimeout(this.push_flip.bind(this) , 500)
   }
-  mousemove(e){
+  event_move(options){
     if(!this.block_data){return}
-    this.block_data.mx2 = e.pageX
-    this.block_data.my2 = e.pageY
+    this.block_data.mx2 = options.x
+    this.block_data.my2 = options.y
     const diff_pos = {
-      x : e.pageX - this.block_data.mx,
-      y : e.pageY - this.block_data.my,
+      x : options.x - this.block_data.mx,
+      y : options.y - this.block_data.my,
     }
     const pos = this.piece_pos_limit({
       x : this.block_data.x + diff_pos.x,
@@ -319,10 +340,10 @@ export class ThreeBlocks{
     })
     this.block_data.target.style.setProperty('left' , `${pos.x}px`, '')
     this.block_data.target.style.setProperty('top'  , `${pos.y}px`, '')
-    this.block_data.move = true
+    this.block_data.move     = true
     this.block_data.move_map = this.get_near_map(pos)
   }
-  mouseup(e){
+  event_end(options){
     if(!this.block_data){return}
     this.block_snap()
     this.current_map = this.block_data.move_map
@@ -333,11 +354,6 @@ export class ThreeBlocks{
     this.options.target.removeAttribute('data-status')
     delete this.block_data
   }
-
-  /* Smartphone-touch */
-  touchstart(e){}
-  touchmove(e){}
-  touchend(e){}
 
   click_rotate(){}
   click_flip(){}

@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <title>Three-blocks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<style>
+.three-blocks,
+.three-blocks *,
+.three-blocks *:before,
+.three-blocks *:after {
+  -webkit-box-sizing : border-box;
+     -moz-box-sizing : border-box;
+       -o-box-sizing : border-box;
+      -ms-box-sizing : border-box;
+          box-sizing : border-box;
+}
+
+.three-blocks{
+  --size-area : 300px;
+  --size-line : 1px;
+  --size-button: 50px;
+  --count-lattice : 5;
+  --size-lattice:calc(var(--size-area) / var(--count-lattice));
+  --color-line : black;
+  --color-block : #888a;
+  --color-block-hover  : #f88a;
+  --color-block-active : #88fa;
+
+  width        : var(--size-area);
+  border-color : var(--color-line);
+  border-style : solid;
+  border-width : 0;
+  position:relative;
+}
+
+.three-blocks .block,
+.three-blocks .block *{
+  font-size:0;
+  padding:0;
+  margin:0;
+  outline:0;
+  border:0;
+}
+.three-blocks .block{
+  display:block;
+  position:absolute;
+  width:0;
+  height:0;
+  z-index:1;
+  transition-property:left , top;
+  transition-duration:0.3s;
+}
+
+.three-blocks:not([data-status='active']) > .block:has(.piece[data-bit='1']:hover) .piece[data-bit='1']{
+  background-color:var(--color-block-hover);
+}
+.three-blocks > .block[data-status='active']{
+  filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
+  z-index:10;
+  transition-property:none;
+}
+.three-blocks > .block[data-status='active'] .piece[data-bit='1']{
+  background-color:var(--color-block-active)!important;
+}
+
+.three-blocks > .block .step{
+  position:absolute;
+  top:0;
+  left:0;
+  width:0;
+  height:0;
+}
+.three-blocks .block .step:nth-of-type(2){
+  top:calc(var(--size-lattice) * 1);
+}
+.three-blocks .block .step:nth-of-type(3){
+  top:calc(var(--size-lattice) * 2);
+}
+
+.three-blocks .block .step .piece{
+  position:absolute;
+  top:0;
+  left:0;
+  width : calc(var(--size-lattice) - 2px);
+  height: calc(var(--size-lattice) - 2px);
+  transform:translate(1px , 1px);
+  background-color: var(--color-block);
+}
+.three-blocks > .block .step .piece[data-bit='1']{
+  background-color: var(--color-block);
+  cursor:pointer;
+}
+.three-blocks .block .step .piece[data-bit='0']{
+  background-color: transparent;
+  pointer-events:none;
+}
+.three-blocks .block .step .piece:nth-of-type(2){
+  left:calc(var(--size-lattice) * 1);
+}
+.three-blocks .block .step .piece:nth-of-type(3){
+  left:calc(var(--size-lattice) * 2);
+}
+
+.three-blocks > button{
+  width:var(--size-area);
+  height:var(--size-button);
+  padding:20px;
+  border-color:#aaa;
+  border-style:solid;
+  border-width:0 1px 1px 1px;
+  cursor:pointer;
+}
+.three-blocks > button:hover{
+  opacity:0.5;
+}
+
+.three-blocks .block-control{
+  position:absolute;
+  z-index:20;
+  display:none;
+  gap:4px;
+}
+.three-blocks .block-control > *{
+  width:30px;
+  height:30px;
+  cursor:pointer;
+}
+.three-blocks .block-control > *:hover{
+  opacity:0.5;
+}
+.three-blocks[data-status='block-over'] .block-control{
+  display:flex;
+}
+
+.three-blocks .links{
+  width:100%;
+  min-height:100px;
+  border:1px solid black;
+  padding:5px 10px;
+}
+.three-blocks .links::before{
+  content:'[Clears]';
+  display:block;
+  font-size:0.8rem;
+  color:#aaa;
+}
+.three-blocks .links ol{
+  padding:0;
+  display:block;
+}
+.three-blocks .links ol li{
+  cursor:pointer;
+  list-style:none;
+  display:inline-block;
+  min-width:30px;
+  height:30px;
+  border:1px solid #aaa;
+  border-radius:2px;
+  background-color:white;
+  text-align:center;
+  line-height:30px;
+  margin:4px;
+}
+.three-blocks .links ol li:hover{
+  background-color:#FEE;
+}
+.three-blocks .links ol li{
+  color:blue;
+}
+.three-blocks .links ol li[data-status='active']{
+  color:red;
+}
+.three-blocks .links ol li[data-clear='1']{
+  color:#aaa;
+}
+
+.three-blocks > .question{
+  width:100%;
+  padding:10px;
+  min-height:100px;
+  background-color:black;
+  color:white;
+} 
+
+.three-blocks > .question .block{
+  position:static;
+  width:auto;
+  height:auto;
+  margin:10px;
+  display:inline-block;
+  vertical-align:top;
+}
+.three-blocks > .question .block .step{
+  position:static;
+  width:auto;
+  height:auto;
+  white-space:nowrap;
+}
+.three-blocks > .question .block .step .piece{
+  position:static;
+  display:inline-block;
+  width:calc(var(--size-lattice) / 2 - 1px);
+  height:calc(var(--size-lattice) / 2 - 1px);
+  margin-right:1px;
+  margin-bottom:1px;
+}
+
+.three-blocks > table{
+  width:var(--size-area);
+  height:var(--size-area);
+  border-collapse:collapse;
+}
+.three-blocks > table td{
+  border:1px solid black;
+  background-color:white;
+}
+.three-blocks > table td[data-status='active']{
+  background-color:black;
+}
+</style>
+<script>
+/* Ajax */
+const settings = {
+  query    : {}, // Array , Object each ok ( ex: {a:"1"} or ["a=1"] )
+  method   : "get", // post | get
+  async    : true,
+  content  : "application/x-www-form-urlencoded",  // default-content-type
+}
+class Ajax{
+  constructor(options){
+    if(!options
+    ||!options.url){
+      return
+    }
+    this.options = this.setOptions(options)
+    this.setQueries()
+    this.flow()
+  }
+
+  setOptions(options){
+    for(var i in settings){
+      options[i] = (typeof options[i] === "undefined") ? settings[i] : options[i]
+    }
+    return options
+  }
+
+  setQueries(){
+    if(!this.options || !this.options.query || typeof this.options.query !== "object"){return}
+    this.queries = []
+    // Arrayの場合の処理
+    if(this.options.query.constructor === Array){
+      for(let q of this.options.query){
+        var sp = q.split("=")
+        this.queries.push(sp[0] +"="+ encodeURIComponent(sp.slice(1)))
+      }
+    }
+    // Objectの場合の処理
+    else{
+      for(var i in this.options.query){
+        this.queries.push(i +"="+ encodeURIComponent(this.options.query[i]))
+      }
+    }
+  }
+
+  createHttpRequest = function(){
+    if(window.ActiveXObject){ //Win ie用
+      try{
+        return new ActiveXObject("Msxml2.XMLHTTP") //MSXML2以降用;
+      }
+      catch(e){
+        try{
+          return new ActiveXObject("Microsoft.XMLHTTP") //旧MSXML用;
+        }
+        catch(e2){return null}
+      }
+    }
+    else if(window.XMLHttpRequest){
+      return new XMLHttpRequest() //Win ie以外のXMLHttpRequestオブジェクト実装ブラウザ用;
+    }
+    else{return null}
+  }
+
+  flow(){
+    this.req = this.createHttpRequest()
+    if(!this.req){return}
+    this.open()
+    this.setFormat()
+    this.onLoadProc()
+    this.send()
+  }
+
+  open(){
+    this.req.open(this.options.method , this.options.url , this.options.async);
+  }
+
+  setFormat(){
+    this.type()
+    this.content()
+    this.setCustom()
+    this.setHeader()
+  }
+
+  /**
+   * タイプ（種別）の情報セット
+   */
+  type(){
+    this.options.type = this.options.type || this.getType()
+    switch(this.options.type){
+      case 'audio':
+      case 'mp3':
+        this.req.responseType = 'arraybuffer'
+        this.req.mode = 'binary'
+        break
+      case 'image':
+        break
+    }
+  }
+  getType(){
+    switch(this.options.ext){
+      case 'mp3':
+        return 'audio'
+      default:
+        return 'text'
+    }
+  }
+
+  /**
+   * Content-Typeのセット
+   */
+  content(){
+    if(!this.options.content){return}
+    this.req.setRequestHeader('Content-Type', this.options.content)
+  }
+
+  /**
+   * property情報の付与
+   */
+  setCustom(costoms){
+    if(!costoms){return}
+    for(let key in costoms){
+      this.req[key] = costoms[key]
+    }
+  }
+
+  /**
+   * header情報のセット
+   */
+  setHeader(headers){
+    if(!headers){return}
+    for(let key in headers){
+      this.req.setRequestHeader(key, headers[key])
+    }
+  }
+
+  /**
+   * ajaxrequest送信
+   */
+  send(){
+    const queries = this.queries.length ? this.queries.join("&") : null
+    this.req.send(queries);
+  }
+
+  readyState(res){
+    switch(this.req.status) {
+      case 200:
+        switch(this.req.readyState){
+          // 読み込み途中
+          case 1:
+          case 2:
+          case 3:
+            this.progress(res)
+            break
+          // 取得完了
+          case 4:
+            this.success(res)
+            break
+        }
+        break;
+
+      default:
+        this.error(res)
+        break
+    }
+  }
+
+  onLoadProc(res){
+    this.req.onreadystatechange = this.readyState.bind(this)
+    // this.req.onload = (function(res){
+    //   console.log(res)
+    // }).bind(this)
+  }
+
+  success(res){
+    if(this.options.success){
+      this.options.success({
+        data     : this.getData(this.req) ,
+        options  : this.options , 
+        request  : this.req , 
+        response : res , 
+        header   : this.getHeader(this.req)
+      })
+    }
+  }
+
+  progress(res){
+    if(this.options.process){
+      this.options.process({
+        data     : this.getData(this.req),
+        options  : this.options , 
+        request  : this.req , 
+        response : res , 
+        header   : this.getHeader(this.req)
+      })
+    }
+  }
+
+  error(res){
+    if(this.options.error){
+      this.options.error({
+        data     : this.getData(this.req),
+        options  : this.options , 
+        request  : this.req , 
+        response : res , 
+        header   : this.getHeader(this.req)
+      })
+    }
+  }
+
+  getData(req){
+    switch(req.mode){
+      case 'binary':
+        return req.response
+
+      case 'text':
+      default:
+        return req.responseText
+    }
+    
+  }
+
+  getHeader(req){
+    const headers = {}
+    const datas = req.getAllResponseHeaders().trim().split(/[\r\n]+/);
+    for(let data of datas){
+      const sp = data.split(':')
+      const key = sp[0].trim()
+      const val = sp[1].replace(/"/g,'').trim()
+      headers[key] = val
+    }
+    return headers
+  }
+  /**
+   * Header情報の,Date-formatをunix-timeに変換する
+   */
+  convertHeaderValue(key, val){
+    switch(key){
+      case 'last-modified':
+      case 'date':
+        const val2 = val ? Date.parse(val) : null
+        val = isNaN(val2) ? val : val2
+        break
+    }
+    return val
+  }
+}
+
+/* Control */
+const ver = "0.0.1"
+const Options = {
+  keyboard : true,
+  mouse    : true,
+  touch    : true,
+
+  // true:キーボード押しっぱなしで文字が連続入力される , false:キーボード押しっぱなしの時に、リピート処理を無くす
+  keyboard_repear : false,
+
+  // true: 斜め入力をする , false: 斜め入力をしない
+  slanting : true,
+
+  // 画面をスワイプすることで上下左右のカーソル操作ができる機能（スマホ用機能）
+  swipe_cursor : true, 
+
+  // swipe_cursor(スワイプカーソル機能)がtrueの時に、カーソル判定スワイプ移動距離(px)
+  touchOffset : 30,
+
+  // touch時に画面スクロールイベントなどを防止する
+  touchPreventDefault : true,
+
+  // ダブルタップタイミング(ms)
+  touchDoubleTapTime : 500,
+
+
+  // イベント発動で発火するメソッド
+  resize_callback     : function(cursor , e){},
+  click_callback      : function(cursor , e){},
+  dblclick_callback   : function(cursor , e){},
+
+  cursordown_callback : function(cursor , e){},
+  cursorup_callback   : function(cursor , e){},
+
+  keydown_callback    : function(code , e){},
+  keyup_callback      : function(code , e){},
+
+  mousedown_callback  : function(e){},
+  mousemove_callback  : function(e){},
+  mouseup_callback    : function(e){},
+
+  touchstart_callback : function(e){},
+  touchmove_callback  : function(cursor , e){},
+  touchend_callback   : function(cursor , e){},
+}
+
+class Control{
+  constructor(options){
+    this.options = this.setOptions(options)
+    this.setEvent()
+  }
+
+  setOptions(options){
+    if(!options){return}
+    for(var i in Options){
+      options[i] = typeof options[i] !== 'undefined' ? options[i] : Options[i]
+    }
+    return options
+  }
+
+  setEvent(){
+    window.addEventListener("resize"    , this.resize.bind(this))
+    window.addEventListener("click"     , this.click.bind(this))
+    window.addEventListener("dblclick"  , this.dblclick.bind(this))
+
+    if(this.options.keyboard){
+      window.addEventListener("keydown" , this.keydown.bind(this))
+      window.addEventListener("keyup"   , this.keyup.bind(this))
+    }
+    if(this.options.mouse){
+      window.addEventListener("mousedown" , this.mousedown.bind(this))
+      window.addEventListener("mousemove" , this.mousemove.bind(this))
+      window.addEventListener("mouseup"   , this.mouseup.bind(this))
+    }
+    if(this.options.touch){
+      window.addEventListener("touchstart" , this.touchstart.bind(this) , {passive : false})
+      window.addEventListener("touchmove"  , this.touchmove.bind(this) , {passive : false})
+      window.addEventListener("touchend"   , this.touchend.bind(this) , {passive : false})
+    }
+  }
+
+  // default
+  resize(e){
+    if(!this.options.resize_callback){return}
+    this.options.resize_callback(e)
+  }
+  click(e){
+    if(!this.options.click_callback){return}
+    this.options.click_callback(e)
+  }
+  dblclick(e){
+    if(!this.options.dblclick_callback){return}
+    this.options.dblclick_callback(e)
+  }
+
+  // Keyboard ----------
+  keydown(e){
+    if(this.options.keyboard_repear !== true && e.repeat === true){return}
+    if(code2cursor(e.keyCode)){
+      this.keydownCursor(e)
+    }
+    else{
+      this.keydownKey(e)
+    }
+  }
+
+  keyup(e){
+    if(this.cursorCodes){
+      this.cursorNum = this.cursorCodes.indexOf(e.keyCode)
+      this.keyupCursor(e)
+    }
+    if(this.keyCodes){
+      this.keyNum = this.keyCodes.indexOf(e.keyCode)
+      this.keyupKey(e)
+    }
+  }
+
+  // Cursor -----
+  // 方向カーソル処理
+  keydownCursor(e){
+    this.cursorCodes = this.cursorCodes || []
+    // 同時押し処理
+    if(this.cursorCodes.indexOf(e.keyCode) === -1){
+      this.cursorCodes.push(e.keyCode)
+    }
+
+    // 斜め入力あり
+    if(this.options.slanting === true){
+      this.options.cursordown_callback(codes2slanting(this.cursorCodes) , e)
+    }
+    // 斜め入力なし
+    else{
+      const cursor = code2cursor(this.cursorCodes[0])
+      this.options.cursordown_callback(cursor , e)
+    }
+  }
+
+  // 方向カーソル処理
+  keyupCursor(e){
+    // 同時押し処理
+    if(this.cursorCodes && this.cursorNum !== -1){
+      this.cursorCodes.splice(this.cursorNum , 1)
+    }
+    
+    // 斜め入力あり
+    if(this.options.slanting === true){
+      this.options.cursorup_callback(codes2slanting(this.cursorCodes) , e)
+    }
+    // 斜め入力なし
+    else{
+      const cursor = code2cursor(this.cursorCodes[0])
+      this.options.cursorup_callback(cursor , e)
+    }
+  }
+
+  // key -----
+  keydownKey(e){
+    this.keyCodes = this.keyCodes || []
+    // 同時押し処理
+    if(this.keyCodes.indexOf(e.keyCode) === -1){
+      this.keyCodes.push(e.keyCode)
+    }
+    const cursor = code2key(this.keyCodes[0])
+    this.options.keydown_callback(cursor , e)
+  }
+
+  keyupKey(e){
+    // 同時押し処理
+    if(this.keyCodes && typeof this.keyNum !== -1){
+      this.keyCodes.splice(this.keyNum , 1)
+    }
+    const cursor = code2key(this.keyCodes[0])
+    this.options.keyup_callback(cursor , e)
+  }
+
+  code2data(keyCode){
+    const value = code2value(keyCode)
+    return {
+      text: value,
+      type: ""
+    }
+  }
+
+  // Mouse ----------
+  mousedown(e){
+    this.mouseDownFlag = true
+    if(!this.options.mousedown_callback){return}
+    this.options.mousedown_callback(e)
+  }
+  mousemove(e){
+    if(!this.mouseDownFlag){return}
+    if(!this.options.mousemove_callback){return}
+    this.options.mousemove_callback(e)
+  }
+  mouseup(e){
+    this.mouseDownFlag = false
+    if(!this.options.mouseup_callback){return}
+    this.options.mouseup_callback(e)
+  }
+
+  // Touch ----------
+  touchstart(e){
+    // tap-count
+    if(this.options.touchDoubleTapTime){
+      this.touchTapCount = this.touchTapCount ? this.touchTapCount + 1 : 1;
+      if(!this.touchTapFlag){
+        this.touchTapFlag = setTimeout(this.touchTap.bind(this) , this.options.touchDoubleTapTime)
+      }
+    }
+    // スワイプで方向処理
+    if(this.options.swipe_cursor){
+      this.touchPos  = {
+        x : e.touches[0].pageX,
+        y : e.touches[0].pageY
+      }
+    }
+    if(!this.options.touchstart_callback){return}
+    this.options.touchstart_callback(e)
+  }
+  touchmove(e){
+    if(this.options.swipe_cursor){
+      this.touchSwipeDirection = touchDirection(
+        this.touchPos,
+        {
+          x: e.touches[0].pageX,
+          y: e.touches[0].pageY
+        },
+        this.options.touchOffset,
+        this.options.slanting
+      );
+    }
+    if(!this.options.touchmove_callback){return}
+    this.options.touchmove_callback(this.touchSwipeDirection , e)
+    if(this.options.touchPreventDefault){
+      e.preventDefault()
+    }
+  }
+  touchend(e){
+    if(!this.options.touchend_callback){return}
+    this.options.touchend_callback(this.touchSwipeDirection , this.touchTapCount || 1 , e)
+    this.touchSwipeDirection = null
+  }
+
+  touchTap(){
+    this.touchTapCount = 0
+    this.touchTapFlag = null
+  }
+
+
+  // lib ----------
+
+  // カーソル入力とキー入力を判別する
+  checkControl(keyCode){
+    if(keyCode === 37
+    || keyCode === 38
+    || keyCode === 39
+    || keyCode === 40){
+      return "cursor"
+    }
+    else{
+      return "key"
+    }
+  }
+}
+
+function touchDirection(cachePos , currentPos , touchOffset , slanting){
+  let res = null
+  let diff = {
+    x : currentPos.x - cachePos.x , 
+    y : currentPos.y - cachePos.y
+  }
+  diff.x = Math.abs(diff.x) >= touchOffset ? diff.x : 0
+  diff.y = Math.abs(diff.y) >= touchOffset ? diff.y : 0
+
+  // slanting
+  if(slanting){
+    if(!diff.x && !diff.y){return ""}
+    if(!diff.y){
+      return diff.x < 0 ? "left" : "right"
+    }
+    if(!diff.x){
+      return diff.y < 0 ? "up" : "down"
+    }
+    const row = diff.y < 0 ? "up" : "down"
+    const col = diff.x < 0 ? "left" : "right"
+    return row +"-"+ col
+  }
+  // no-slanting
+  else{
+    if(!diff.x && !diff.y){return ""}
+    // x軸とy軸の大きい方を優先する
+    if(Math.abs(diff.x) > Math.abs(diff.y)){
+      return diff.x < 0 ? "left" : "right"
+    }
+    else{
+      return diff.y < 0 ? "up" : "down"
+    }
+  }
+  return res
+}
+
+// ナナメ判定
+function codes2slanting(keyCodes){
+  if(!keyCodes){
+    return null
+  }
+  if(keyCodes.length === 1){
+    return code2cursor(keyCodes[0])
+  }
+  // up-left
+  if((keyCodes[0] === 38 && keyCodes[1] === 37)
+  || (keyCodes[0] === 37 && keyCodes[1] === 38)){
+    return "up-left";
+  }
+  // up-right
+  if((keyCodes[0] === 38 && keyCodes[1] === 39)
+  || (keyCodes[0] === 39 && keyCodes[1] === 38)){
+    return "up-right";
+  }
+  // down-left
+  if((keyCodes[0] === 40 && keyCodes[1] === 37)
+  || (keyCodes[0] === 37 && keyCodes[1] === 40)){
+    return "down-left";
+  }
+  // down-right
+  if((keyCodes[0] === 40 && keyCodes[1] === 39)
+  || (keyCodes[0] === 39 && keyCodes[1] === 40)){
+    return "down-right";
+  }
+  return code2cursor(keyCodes[0])
+}
+
+
+function code2type(keyCode){
+  const value = code2value(keyCode)
+  if(value === "up"
+  || value === "down"
+  || value === "left"
+  || value === "right"){
+    return {
+      control: value,
+      key : null
+    }
+  }
+  else{
+    return {
+      control : null,
+      key : value
+    }
+  }
+}
+
+// Only cursor
+function code2cursor(keyCode){
+  switch(keyCode){
+    case  37: return "left"
+    case  38: return "up"
+    case  39: return "right"
+    case  40: return "down"
+    default:null
+  }
+}
+
+// exclusion cursor
+function code2key(keyCode){
+  switch(keyCode){
+    case   0: return "¥"
+    case   8: return "backspace"
+    case   9: return "tab"
+    case  13: return "return"
+    case  16: return "shift"
+    case  18: return "option"
+    case  32: return "space"
+    case  48: return "0"
+    case  49: return "1"
+    case  50: return "2"
+    case  51: return "3"
+    case  52: return "4"
+    case  53: return "5"
+    case  54: return "6"
+    case  55: return "7"
+    case  56: return "8"
+    case  57: return "9"
+    case  65: return "a"
+    case  66: return "b"
+    case  67: return "c"
+    case  68: return "d"
+    case  69: return "e"
+    case  70: return "f"
+    case  71: return "g"
+    case  72: return "h"
+    case  73: return "i"
+    case  74: return "j"
+    case  75: return "k"
+    case  76: return "l"
+    case  77: return "m"
+    case  78: return "n"
+    case  79: return "o"
+    case  80: return "p"
+    case  81: return "q"
+    case  82: return "r"
+    case  83: return "s"
+    case  84: return "t"
+    case  85: return "u"
+    case  86: return "v"
+    case  87: return "w"
+    case  88: return "x"
+    case  89: return "y"
+    case  90: return "z"
+    case  91: return "command"
+    case 187: return "^"
+    case 189: return "-"
+  }
+  return null
+}
+
+// all keys
+function code2value(keyCode){
+  let res = code2cursor(keyCode)
+  if(res){
+    return res
+  }
+  res = code2key(keyCode)
+  return res
+}
+
+/* CSS */
+class Css{
+  search_value(selector , property , sheets){
+    sheets = sheets || document.styleSheets
+    let val = ''
+    for(const sheet of sheets){
+      const res = this.get_rules(selector , property , sheet.cssRules)
+      val = res || val
+    }
+    return val
+  }
+
+  get_rules(selector , property , rules){
+    let val = ''
+    for(const rule of rules){
+      if(rule.href){
+        const res = this.get_rules(selector , property , rule.styleSheet.cssRules)
+        val = res || val
+      }
+      else{
+        const res = this.get_value(selector , property , rule)
+        val = res || val
+      }
+    }
+    return val
+  }
+  get_value(selector , property , rule){
+    if(rule.selectorText === selector){
+      const reg = new RegExp(property+'(.*?):(.+?);')
+      const res = rule.cssText.match(reg)
+      return res && res.length && res[2] ? res[2] : ''
+    }
+  }
+}
+
+/* ThreeBlocks */
+class ThreeBlocks{
+  constructor(options){
+    if(!options || !options.target){return}
+    this.options = options || {}
+    this.question_num = 0
+    this.load_questions()
+  }
+
+  get target(){
+    return this.options.target
+  }
+
+  get area_rect(){
+    return this.options.target.getBoundingClientRect()
+  }
+  get size_piece(){
+    const css = new Css()
+    const size_area = this.area_rect.width
+    const count_lattice = css.search_value('.three-blocks' , '--count-lattice')
+    return ~~(Number(size_area) / Number(count_lattice))
+  }
+
+  get elm_question(){
+    return document.querySelector(`.three-blocks .question`)
+  }
+
+  get count_pieces(){
+    return new Css().search_value('.three-blocks' , '--count-lattice')
+  }
+
+  get rotates(){
+    return [0,90,180,270]
+  }
+
+  get question_blocks(){
+    return this.question_datas.questions[this.question_num].blocks
+  }
+
+  get elm_links(){
+    return document.querySelector('.three-blocks .links ol')
+  }
+
+  load_questions(){
+    new Ajax({
+      url : 'data/questions.json',
+      success : this.loaded_questions.bind(this)
+    })
+  }
+  loaded_questions(e){
+    this.question_datas = JSON.parse(e.data)
+    this.init()
+  }
+
+  init(){
+    
+    this.add_table()
+    this.add_submit()
+    this.add_question()
+    this.add_links()
+    this.add_blocks()
+    this.set_control()
+    this.view_question()
+  }
+
+  add_table(){
+    const separate = this.count_pieces
+    const table = document.createElement('table')
+    for(let i=0; i<separate; i++){
+      const tr = document.createElement('tr')
+      table.appendChild(tr)
+      for(let j=0; j<separate; j++){
+        const td = document.createElement('td')
+        tr.appendChild(td)
+      }
+    }
+    this.options.target.appendChild(table)
+  }
+  add_question(){
+    const div = document.createElement('div')
+    div.className = 'question'
+    this.options.target.appendChild(div)
+  }
+  add_links(){
+    const div = document.createElement('div')
+    div.className = 'links'
+    this.options.target.appendChild(div)
+    const ul = document.createElement('ol')
+    div.appendChild(ul)
+    const datas = this.load_clears()
+    if(datas && datas.length){
+      this.add_link_items(datas, true)
+      const next_id = datas[datas.length-1]+1
+      this.question_num = this.question_datas.questions.findIndex(e => e.id === next_id)
+    }
+  }
+  add_link_items(items , clear_flg){
+    if(!items || !items.length){return}
+    for(const item of items){
+      const id = item
+      const li = document.createElement('li')
+      li.textContent = id
+      li.setAttribute('data-id' , id)
+      li.setAttribute('data-clear' , clear_flg ? 1 : 0)
+      li.addEventListener('click' , (e=>{
+        const id = e.currentTarget.getAttribute('data-id')
+        this.any_questions(id)
+      }).bind(this))
+      this.elm_links.appendChild(li)
+      const a = document.createElement('a')
+    }
+  }
+  add_submit(){
+    const btn = document.createElement('button')
+    btn.className = 'answer'
+    btn.textContent = 'Answer'
+    this.options.target.appendChild(btn)
+    btn.addEventListener('click' , this.click_answer.bind(this))
+  }
+
+  add_blocks(){
+    for(let i=0; i<this.question_datas.block_pieces.length; i++){
+      this.add_block(i)
+    }
+  }
+  reset_answer_blocks(){
+    const blocks = this.target.querySelectorAll(`:scope > .block`)
+    for(let i=0; i<blocks.length; i++){
+      const x = this.target.offsetWidth + this.size_piece
+      const y = i * (this.size_piece * 3)
+      blocks[i].style.setProperty('left' , `${x}px`,'')
+      blocks[i].style.setProperty('top'  , `${y}px`,'')
+      blocks[i].setAttribute('data-rotate' , 0)
+      // this.del_block_piece(blocks[i])
+      this.set_block_piece(blocks[i])
+    }
+  }
+
+  // ブロックの作成 + 配置
+  add_block(num){
+    const block = document.createElement('div')
+    block.classList.add('block')
+    block.setAttribute('data-block-num' , num)
+    block.setAttribute('data-rotate' , 0)
+    this.target.appendChild(block)
+    this.set_block_piece(block)
+    const x = this.target.offsetWidth + this.size_piece
+    const y = num * (this.size_piece * 3)
+    block.style.setProperty('left' , `${x}px`,'')
+    block.style.setProperty('top'  , `${y}px`,'')
+    this.current_map = {
+      x : x,
+      y : y,
+    }
+  }
+
+  // ブロク内のピース作成+配置
+  set_block_piece(block){
+    this.del_block_piece(block)
+    const num    = Number(block.getAttribute('data-block-num'))
+    const rotate = Number(block.getAttribute('data-rotate') || 0)
+    const flip   = Number(block.getAttribute('data-flip') || 0)
+    const data   = this.rotate_block_piece(this.question_datas.block_pieces[num].map, rotate , flip)
+    if(!data){return}
+    // 段
+    for(let i=0; i<data.length; i++){
+      const step = document.createElement('div')
+      step.className = 'step'
+      for(let j=0; j<data[i].length; j++){
+        const piece = document.createElement('div')
+        piece.className = 'piece'
+        piece.setAttribute('data-bit' , data[i][j])
+        step.appendChild(piece)
+      }
+      block.appendChild(step)
+    }
+  }
+  del_block_piece(block){
+    block.innerHTML = ''
+  }
+  rotate_block_piece(data , rotate , flip){
+    const new_data = []
+    if((rotate === 90 && flip === 0)
+    || (rotate === 270 && flip === 1)){
+      for(let i=data.length-1; i>=0; i--){
+        for(let j=0; j<data[i].length; j++){
+          new_data[j] = new_data[j] || []
+          if(flip){
+            new_data[j].unshift(data[i][j])
+          }
+          else{
+            new_data[j].push(data[i][j])
+          }
+        }
+      }
+      return new_data
+    }
+    else if(rotate === 180){
+      for(let i=data.length-1; i>=0; i--){
+        for(let j=data[i].length-1; j>=0; j--){
+          new_data[data.length-1 - i] = new_data[data.length-1 - i] || []
+          if(flip){
+            new_data[data.length-1 - i].unshift(data[i][j])
+          }
+          else{
+            new_data[data.length-1 - i].push(data[i][j])
+          }
+        }
+      }
+      return new_data
+    }
+    if((rotate === 270 && flip === 0)
+    || (rotate === 90 && flip === 1)){
+      for(let i=data.length-1; i>=0; i--){
+        for(let j=data[i].length-1; j>=0; j--){
+          let row
+          if(flip){
+            row = data[i].length-1 - j
+            new_data[row] = new_data[row] || []
+            new_data[row].push(data[i][j])
+          }
+          else{
+            row = data[i].length-1 - j
+            new_data[row] = new_data[row] || []
+            new_data[row].unshift(data[i][j])
+          }
+          
+        }
+      }
+      return new_data
+    }
+    else if(flip){
+      for(let i=0; i<data.length; i++){
+        for(let j=0; j<data[i].length; j++){
+          new_data[i] = new_data[i] || []
+          if(flip){
+            new_data[i].unshift(data[i][j])
+          }
+          else{
+            new_data[i].push(data[i][j])
+          }
+        }
+      }
+      return new_data
+    }
+    else{
+      return data
+    }
+  }
+
+  set_control(){
+    new Control({
+      slanting : false, // 斜め入力なし
+      resize_callback     : this.resize.bind(this),
+      click_callback      : this.click.bind(this),
+      cursordown_callback : this.cursordown.bind(this),
+      cursorup_callback   : this.cursorup.bind(this),
+      keydown_callback    : this.keydown.bind(this),
+      keyup_callback      : this.keyup.bind(this),
+      mousedown_callback  : this.mousedown.bind(this),
+      mousemove_callback  : this.mousemove.bind(this),
+      mouseup_callback    : this.mouseup.bind(this),
+      touchstart_callback : this.touchstart.bind(this),
+      touchmove_callback  : this.touchmove.bind(this),
+      touchend_callback   : this.touchend.bind(this),
+    })
+  }
+  resize(e){}
+  click(e){}
+  cursordown(e){}
+  cursorup(e){}
+  keydown(e){}
+  keyup(e){}
+
+  /* PC-mouse */
+  mousedown(e){
+    const target = e.target.closest('.block[data-block-num]')
+    if(!target){return}
+    const current_pos = {
+      x  : target.offsetLeft,
+      y  : target.offsetTop,
+    }
+    const map = this.get_near_map(current_pos)
+    this.block_data = {
+      target : target,
+      x   : current_pos.x,
+      y   : current_pos.y,
+      w   : target.scrollWidth,
+      h   : target.scrollHeight,
+      mx  : e.pageX,
+      my  : e.pageY,
+      mx2 : e.pageX,
+      my2 : e.pageY,
+      move_map    : map,
+      time : (+new Date()),
+    }
+    target.setAttribute('data-status','active')
+    this.options.target.setAttribute('data-status' , 'active')
+    setTimeout(this.push_flip.bind(this) , 500)
+  }
+  mousemove(e){
+    if(!this.block_data){return}
+    this.block_data.mx2 = e.pageX
+    this.block_data.my2 = e.pageY
+    const diff_pos = {
+      x : e.pageX - this.block_data.mx,
+      y : e.pageY - this.block_data.my,
+    }
+    const pos = this.piece_pos_limit({
+      x : this.block_data.x + diff_pos.x,
+      y : this.block_data.y + diff_pos.y,
+    })
+    this.block_data.target.style.setProperty('left' , `${pos.x}px`, '')
+    this.block_data.target.style.setProperty('top'  , `${pos.y}px`, '')
+    this.block_data.move = true
+    this.block_data.move_map = this.get_near_map(pos)
+  }
+  mouseup(e){
+    if(!this.block_data){return}
+    this.block_snap()
+    this.current_map = this.block_data.move_map
+    if(this.check_rotate()){
+      this.block_rotate()
+    }
+    this.block_data.target.removeAttribute('data-status')
+    this.options.target.removeAttribute('data-status')
+    delete this.block_data
+  }
+
+  /* Smartphone-touch */
+  touchstart(e){}
+  touchmove(e){}
+  touchend(e){}
+
+  click_rotate(){}
+  click_flip(){}
+  
+  push_flip(){
+    if(!this.block_data
+    || this.block_data.move === true){return}
+    this.block_flip()
+  }
+
+  check_rotate(){
+    if((+new Date()) - this.block_data.time > 200){
+      return false
+    }
+    const diff = {
+      x : Math.abs(this.block_data.mx - this.block_data.mx2),
+      y : Math.abs(this.block_data.my - this.block_data.my2),
+    }
+    if(diff.x < 4
+    && diff.y < 4
+    && this.current_map.x === this.block_data.move_map.x
+    && this.current_map.y === this.block_data.move_map.y){
+      return true
+    }
+  }
+
+  piece_pos_limit(pos){
+    return pos
+  }
+
+  /* Block */
+  // 一番近いブロックにスナップさせる処理
+  block_snap(){
+    if(!this.block_data){return}
+    if(this.block_data.mx2 < 0
+    || this.block_data.my2 < 0){
+      return
+    }
+    const current_pos = {
+      x : this.block_data.target.offsetLeft,
+      y : this.block_data.target.offsetTop,
+    }
+    const new_pos = this.get_map_near_block(current_pos)
+    this.block_data.target.style.setProperty('left' , `${new_pos.x}px`, '')
+    this.block_data.target.style.setProperty('top'  , `${new_pos.y}px`, '')
+  }
+  // 左上座標で調査
+  get_map_near_block(current_pos){
+    const new_pos = this.get_near_map(current_pos)
+
+    return new_pos
+  }
+
+  // rotate
+  block_rotate(){
+    const elm = this.block_data.target
+    let rotate = Number(elm.getAttribute('data-rotate') || 0)
+    rotate += 90
+    rotate = rotate < 360 ? rotate : 0
+    this.block_data.target.setAttribute('data-rotate' , rotate)
+    // this.del_block_piece(this.block_data.target)
+    this.set_block_piece(this.block_data.target)
+  }
+
+  // flip
+  block_flip(){
+    const elm = this.block_data.target
+    let flip = Number(elm.getAttribute('data-flip') || 0)
+    flip = flip ? 0 : 1
+    this.block_data.target.setAttribute('data-flip' , flip)
+    this.set_block_piece(this.block_data.target)
+  }
+
+  get_near_map(pos){
+    return {
+      x : ~~((pos.x + (this.size_piece/2)) / this.size_piece) * this.size_piece,
+      y : ~~((pos.y + (this.size_piece/2)) / this.size_piece) * this.size_piece,
+    }
+  }
+
+  view_question(){
+    if(this.question_num === undefined){
+      alert('全ての問題をクリアしています。')
+      return
+    }
+    const num = this.question_num
+    const question_items = this.question_datas.questions[num]
+    if(!question_items || !question_items.blocks){return}
+    this.clear_question()
+    for(const items of question_items.blocks){
+      const q_item = document.createElement('div')
+      q_item.className = 'block'
+      this.elm_question.appendChild(q_item)
+      for(let i=0; i<items.length; i++){
+        const step = document.createElement('div')
+        step.className = 'step'
+        for(let j=0; j<items[i].length; j++){
+          const piece = document.createElement('div')
+          piece.className = 'piece'
+          piece.setAttribute('data-bit' , items[i][j])
+          step.appendChild(piece)
+        }
+        q_item.appendChild(step)
+      }
+    }
+    const id = question_items.id
+    const link_elm = this.elm_links.querySelector(`[data-id='${id}']`)
+    if(link_elm){
+      link_elm.setAttribute('data-status' , 'active')
+    }
+    else{
+      this.add_link_items([id])
+    }
+  }
+  clear_link_active(){
+    const elms = this.elm_links.querySelectorAll(`[data-id]`)
+    for(const elm of elms){
+      if(!elm.hasAttribute('data-status')){continue}
+      elm.removeAttribute('data-status')
+    }
+  }
+  clear_question(){
+    this.elm_question.innerHTML = ''
+  }
+
+  click_answer(){
+    this.answer_datas = this.get_block_count_matrix()
+    // 配置ブロクの重なりチェック
+    if(this.check_inner()){
+      this.error('error : overlap !')
+    }
+    // 枠外はみ出しチェック
+    else if(this.check_outer()){
+      this.error('error : outer !')
+    }
+    // 空き状態に問題ブロックをはめ込む判定判定（true:不正解）
+    else if(this.check_question_blocks(JSON.parse(JSON.stringify(this.answer_datas.empty)))){
+      this.error('error : Do not fit !')
+    }
+    // 正解
+    else{
+      this.corrected_question()
+    }
+  }
+  // pieceが重なっているチェック
+  check_inner(){
+    if(this.answer_datas.inner.find(e => e.find(e => e >= 2) !== undefined)){return true}
+  }
+  check_outer(){
+    if(this.answer_datas.outer){return true}
+  }
+  // ブロックの配置をチェック
+  get_block_count_matrix(){
+    const blocks = this.target.querySelectorAll(':scope > .block')
+    const datas = []
+    let outer = 0
+    // default
+    for(let y=0; y<this.count_pieces; y++){
+      datas.push([])
+      for(let x=0; x<this.count_pieces; x++){
+        datas[y].push(0)
+      }
+    }
+    // blocks
+    let num = 0
+    for(const block of blocks){
+      const block_pos = {
+        x : ~~(block.offsetLeft / this.size_piece),
+        y : ~~(block.offsetTop  / this.size_piece),
+      }
+      const rotate = Number(block.getAttribute('data-rotate') || 0)
+      const flip   = Number(block.getAttribute('data-flip') || 0)
+      const data = this.rotate_block_piece(this.question_datas.block_pieces[num].map , rotate , flip)
+      for(let i=0; i<data.length; i++){
+        for(let j=0; j<data[i].length; j++){
+          const shift_pos = {
+            x : j + block_pos.x,
+            y : i + block_pos.y,
+          }
+          if(data[i][j] === 0){continue}
+          if(shift_pos.x < 0
+          || shift_pos.y < 0
+          || shift_pos.x >= this.count_pieces
+          || shift_pos.y >= this.count_pieces
+          || data[i] === undefined
+          || data[i][j] === undefined){
+            outer++
+            continue
+          }
+          datas[shift_pos.y][shift_pos.x]++
+        }
+      }
+      num++
+    }
+    return {
+      inner : datas,
+      outer : outer,
+      empty : this.get_empty_matrix(datas)
+    }
+  }
+  get_empty_matrix(datas){
+    if(!datas){return}
+    const empty_datas = []
+    for(let y=0; y<datas.length; y++){
+      empty_datas[y] = []
+      for(let x=0; x<datas[y].length; x++){
+        empty_datas[y][x] = datas[y][x] === 0 ? 0 : 1
+      }
+    }
+    return empty_datas
+  }
+
+  // 正解判定
+  check_question_blocks(answer_data , question_num){
+    question_num = question_num || 0
+    if(question_num >= this.question_blocks.length){return false}
+    for(const flip of [0,1]){
+      for(const rotate of this.rotates){
+        const question_data = this.rotate_block_piece(this.question_blocks[question_num] , rotate , flip)
+        const len_x = question_data[0].length
+        const question_str = question_data.flat().join('')
+        for(let y=0; y<=answer_data.length - question_data.length; y++){
+          for(let x=0; x<=answer_data[0].length - len_x; x++){
+            const answer_datas = []
+            for(let i=0; i<question_data.length; i++){
+              const line = JSON.parse(JSON.stringify(answer_data[y + i]))
+              answer_datas.push(line.splice(x , len_x))
+            }
+            const answer_str = answer_datas.flat().join('')
+            const check_bit = this.check_overlap_bit(question_str , answer_str)
+            if(check_bit === false){
+              const update_answer_data = this.merge_data(answer_data , question_data , y , x)
+              const res = this.check_question_blocks(update_answer_data , question_num+1)
+              if(res === false){
+                return false
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return true
+  }
+
+  // true : 重なり有り（不正解） , false : 重なりナシ（正解）
+  check_overlap_bit(question_str , answer_str){
+    return `0b${question_str}` & `0b${answer_str}` ? true : false
+  }
+
+  // 答えblockをはめ込んだ配置マップを作成
+  merge_data(data1 , data2 , shift_y , shift_x){
+    const new_data = []
+    for(let i=0; i<data1.length; i++){
+      new_data[i] = []
+      for(let j=0; j<data1[i].length; j++){
+        new_data[i][j] = data1[i][j]
+      }
+    }
+    for(let i=0; i<data2.length; i++){
+      for(let j=0; j<data2[i].length; j++){
+        new_data[shift_y + i][shift_x + j] += data2[i][j]
+      }
+    }
+    return new_data
+  }
+
+  error(message){
+    alert(message)
+  }
+
+  corrected_question(){
+    this.clear_question()
+    this.set_message(`<dis>正解！</div><div><button class='next'>次の問題</button></div>`)
+    this.elm_question.querySelector('.next').addEventListener('click' , this.next_question.bind(this))
+
+    // links操作
+    const id = this.question_datas.questions[this.question_num].id
+    const link_elm = this.elm_links.querySelector(`[data-id='${id}']`)
+    if(link_elm){
+      link_elm.setAttribute('data-clear' , '1')
+    }
+
+    // localstorage
+    const clear_datas = this.load_clears()
+    if(!clear_datas.find(e => e === id)){
+      this.save_clear_id(id)
+    }
+  }
+  set_message(message){
+    this.elm_question.innerHTML = message
+  }
+
+  next_question(){
+    this.question_num++
+    this.reset_answer_blocks()
+    this.view_question()
+  }
+
+  any_questions(id){
+    this.question_num = this.search_question_num(id)
+    this.reset_answer_blocks()
+    this.view_question()
+  }
+  search_question_num(id){console.log(this.question_datas)
+    const question_index = this.question_datas.questions.findIndex(e => String(e.id) === String(id))
+    return question_index
+  }
+
+  save_clear_id(id){
+    const datas = this.load_clears() || []
+    datas.push(id)
+    const json = JSON.stringify(datas.sort())
+    window.localStorage.setItem('three-blocks-clear' , json)
+  }
+  load_clears(){
+    const json = window.localStorage.getItem('three-blocks-clear')
+    return json ? JSON.parse(json) : []
+  }
+}
+
+/* Game */
+class Game{
+  constructor(options){
+    this.options = options || {}
+    this.set_array()
+  }
+  get selector(){
+    return '.three-blocks'
+  }
+  get targets(){
+    return document.querySelectorAll(this.selector)
+  }
+
+  set_array(){
+    for(const target of this.targets){
+      new ThreeBlocks({
+        target : target
+      })
+    }
+  }
+}
+
+/* Start */
+switch(document.readyState){
+  case 'complete':
+  case 'interactive':
+    new Game()
+    break
+  default:
+    window.addEventListener('load' , (e => new Game()))
+    break
+}
+</script>
+</head>
+<body>
+  <div class='three-blocks'></div>
+</body>
+</html>
