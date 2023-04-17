@@ -295,7 +295,9 @@ export class ThreeBlocks{
       x : e.touches[0].pageX,
       y : e.touches[0].pageY,
     })
-    e.preventDefault()
+    if(e.target.closest('.three-blocks > .block')){
+      e.preventDefault()
+    }
   }
   touchend(e){
     this.event_end()

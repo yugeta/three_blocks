@@ -21,7 +21,7 @@
   background-color:var(--color-block-hover);
 }
 .three-blocks > .block[data-status='active']{
-  filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
+  /* filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.5)); */
   z-index:10;
   transition-property:none;
 }
