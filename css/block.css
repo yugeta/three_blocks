@@ -18,7 +18,8 @@
 }
 
 .three-blocks:not([data-status='active']) > .block:has(.piece[data-bit='1']:hover) .piece[data-bit='1']{
-  background-color:var(--color-block-hover);
+  /* background-color:var(--color-block-hover); */
+  opacity:0.7;
 }
 .three-blocks > .block[data-status='active']{
   /* filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.5)); */
@@ -26,7 +27,8 @@
   transition-property:none;
 }
 .three-blocks > .block[data-status='active'] .piece[data-bit='1']{
-  background-color:var(--color-block-active)!important;
+  /* background-color:var(--color-block-active)!important; */
+  opacity:0.7;
 }
 
 .three-blocks > .block .step{
@@ -56,6 +58,16 @@
   background-color: var(--color-block);
   cursor:pointer;
 }
+.three-blocks > .block[data-block-num='0'] .step .piece[data-bit='1']{
+  background-color: #F006;
+}
+.three-blocks > .block[data-block-num='1'] .step .piece[data-bit='1']{
+  background-color: #00F6;
+}
+.three-blocks > .block[data-block-num='2'] .step .piece[data-bit='1']{
+  background-color: #0F06;
+}
+
 .three-blocks .block .step .piece[data-bit='0']{
   background-color: transparent;
   pointer-events:none;

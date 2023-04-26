@@ -259,9 +259,9 @@ export class ThreeBlocks{
     window.addEventListener('mousedown'  , this.mousedown.bind(this))
     window.addEventListener('mousemove'  , this.mousemove.bind(this))
     window.addEventListener('mouseup'    , this.mouseup.bind(this))
-    window.addEventListener('touchstart' , this.touchstart.bind(this))
+    window.addEventListener('touchstart' , this.touchstart.bind(this), {passive : false})
     window.addEventListener('touchmove'  , this.touchmove.bind(this), {passive : false})
-    window.addEventListener('touchend'   , this.touchend.bind(this))
+    window.addEventListener('touchend'   , this.touchend.bind(this), {passive : false})
   }
 
   /* PC-mouse */
@@ -277,6 +277,7 @@ export class ThreeBlocks{
       x : e.pageX,
       y : e.pageY,
     })
+    e.preventDefault()
   }
   mouseup(e){
     this.event_end()
@@ -295,9 +296,9 @@ export class ThreeBlocks{
       x : e.touches[0].pageX,
       y : e.touches[0].pageY,
     })
-    if(e.target.closest('.three-blocks > .block')){
+    // if(e.target.closest('.three-blocks > .block')){
       e.preventDefault()
-    }
+    // }
   }
   touchend(e){
     this.event_end()
@@ -629,7 +630,7 @@ export class ThreeBlocks{
 
   corrected_question(){
     this.clear_question()
-    this.set_message(`<dis>正解！</div><div><button class='next'>次の問題</button></div>`)
+    this.set_message(`<dis>正解！</div><div style='margin-top:10px;'><button class='next'>次の問題</button></div>`)
     this.elm_question.querySelector('.next').addEventListener('click' , this.next_question.bind(this))
 
     // links操作
@@ -660,7 +661,7 @@ export class ThreeBlocks{
     this.reset_answer_blocks()
     this.view_question()
   }
-  search_question_num(id){console.log(this.question_datas)
+  search_question_num(id){
     const question_index = this.question_datas.questions.findIndex(e => String(e.id) === String(id))
     return question_index
   }
@@ -668,7 +669,7 @@ export class ThreeBlocks{
   save_clear_id(id){
     const datas = this.load_clears() || []
     datas.push(id)
-    const json = JSON.stringify(datas.sort())
+    const json = JSON.stringify(datas.sort((a,b)=>{return a - b}))
     window.localStorage.setItem('three-blocks-clear' , json)
   }
   load_clears(){
